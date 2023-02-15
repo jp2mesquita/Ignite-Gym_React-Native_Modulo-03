@@ -3,6 +3,7 @@ import { VStack, Image, Text, Center, Heading, ScrollView} from "native-base"
 import BackgroundImg from '@assets/background.png'
 import  LogoSvg from  '@assets/logo.svg'
 import { Input } from "@components/Input"
+import { Button } from "@components/Button"
 
 export function SignIn() {
   return(
@@ -44,6 +45,14 @@ export function SignIn() {
             
             />
 
+          <Button 
+            title="Acessar"
+          />
+
+          <Button 
+            title="Criar conta"
+            variant='outline'
+          />
         </Center>
       </ScrollView>
 
