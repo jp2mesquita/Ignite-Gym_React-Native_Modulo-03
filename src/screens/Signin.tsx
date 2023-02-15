@@ -21,9 +21,11 @@ export function SignIn() {
         </Text>
       </Center>
 
-      <Heading color='gray.100'>
-        Acesse sua conta
-      </Heading>
+      <Center>
+        <Heading color='gray.100'>
+          Acesse sua conta
+        </Heading>
+      </Center>
 
     </VStack>
   )
