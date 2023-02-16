@@ -4,6 +4,8 @@ import { Group } from "@components/Group";
 import { HomeHeader } from "@components/HomeHeader";
 import { HStack, VStack, FlatList, Heading, Text } from "native-base";
 import { ExerciseCard } from "./ExerciseCard";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigationRoutesProps } from "@routes/app.routes";
 
 
 
@@ -13,8 +15,14 @@ export function Home(){
 
   const [ groupSelected, setGroupSelected ] = useState('Costas')
 
+  const { navigate } = useNavigation<AppNavigationRoutesProps>()
+
   function handleSelectGroup(group: string){
     setGroupSelected(group)
+  }
+
+  function handleOpenExerciseDetails() {
+    navigate('exercise')
   }
   return(
     <VStack flex={1}>
@@ -55,10 +63,11 @@ export function Home(){
           keyExtractor={item => item}
           renderItem={ ({ item }) => {
             return(
-              <ExerciseCard 
+              <ExerciseCard
                 title={item}
                 imageUri='https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dW5pbGF0ZXJhbCUyMHB1bGx1cHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60'
                 description={item}
+                onPress={handleOpenExerciseDetails} 
               />
             )
           }}
