@@ -1,5 +1,4 @@
 import { Text, Pressable, IPressableProps } from "native-base";
-import { PressableProps } from "react-native";
 
 type GroupProps = IPressableProps & {
   name: string
