@@ -1,17 +1,63 @@
-import { Center, ScrollView, VStack, Skeleton, Text, Heading } from "native-base";
-
-import { UserPhoto } from "@components/UserPhoto";
-import { ScreenHeader } from "@components/ScreenHeader";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
+import { Center, ScrollView, VStack, Skeleton, Text, Heading, useToast } from "native-base";
+
+import * as ImagePicker from 'expo-image-picker'
+import * as FileSystem from 'expo-file-system';
+
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { UserPhoto } from "@components/UserPhoto";
+import { ScreenHeader } from "@components/ScreenHeader";
 
 const PHOTO_SIZE= 33
 
 export function Profile(){
   const [photoIsLoading, setPhotoIsLoading] = useState(false)
+  const [userPhoto, setUserPhoto] = useState('https://github.com/jp2mesquita.png')
 
+  const toast = useToast()
+  
+  async function handleUserPhotoSelect(){
+    setPhotoIsLoading(true)
+    try {
+      const selectedPhoto = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4,4],
+        allowsEditing: true,
+      })
+  
+      if(selectedPhoto.canceled) {
+        return
+      }
+
+      
+
+      if(selectedPhoto.assets[0].uri) {
+        const photoInfo = await FileSystem.getInfoAsync(selectedPhoto.assets[0].uri)
+
+        if(photoInfo.size && (photoInfo.size > 1024 * 1024 * 5 )) { //bigger than 5MB
+          
+          toast.show({
+            title: 'Essa imagem é muito grande. Escolha uma de até 5MB',
+            placement: 'top',
+            bgColor: 'red.500'
+          })
+         
+          return
+        }
+
+        setUserPhoto(selectedPhoto.assets[0].uri)
+      }
+  
+      
+    } catch (error) {
+      console.log(error)
+    } finally{
+      setPhotoIsLoading(false)
+    }
+  }
   return(
     <VStack flex={1}>
       <ScreenHeader 
@@ -34,11 +80,11 @@ export function Profile(){
             : <UserPhoto 
                 size={PHOTO_SIZE} 
                 alt='Foto de perfil do usuário' 
-                source={{ uri: 'https://github.com/jp2mesquita.png'}}
+                source={{ uri: userPhoto}}
               />
           }
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleUserPhotoSelect}>
             <Text color='green.500' fontWeight='bold' fontSize="md" mt={2} mb={8}>
               Alterar foto
             </Text>
