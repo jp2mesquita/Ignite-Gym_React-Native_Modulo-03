@@ -1,29 +1,28 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { HStack, VStack, FlatList, Heading, Text, useToast } from "native-base";
+
+import { ExerciseCard } from "./ExerciseCard";
 
 import { Group } from "@components/Group";
 import { HomeHeader } from "@components/HomeHeader";
-import { HStack, VStack, FlatList, Heading, Text, useToast } from "native-base";
-import { ExerciseCard } from "./ExerciseCard";
-import { useNavigation } from "@react-navigation/native";
-import { AppNavigationRoutesProps } from "@routes/app.routes";
+
 import { api } from "@services/api";
 import { AppError } from "@utils/AppError";
+import { AppNavigationRoutesProps } from "@routes/app.routes";
 
-
+import { ExerciseDTO } from "@dtos/ExerciseDTO";
 
 export function Home(){
   const [groups, setGroups]= useState<string[]>([])
-  const [exercises, setexErcises]= useState(['Puxada frontal', "Remada  curvada", "Remada unilateral", 'Levantamento terra' ])
+  const [exercises, setexErcises]= useState<ExerciseDTO[]>([])
 
-  const [ groupSelected, setGroupSelected ] = useState('Costas')
+  const [ groupSelected, setGroupSelected ] = useState('')
 
   const { navigate } = useNavigation<AppNavigationRoutesProps>()
 
   const toast = useToast()
 
-  function handleSelectGroup(group: string){
-    setGroupSelected(group)
-  }
 
   function handleOpenExerciseDetails() {
     navigate('exercise')
@@ -47,9 +46,37 @@ export function Home(){
     }
   }
 
+  async function fetchExercicesByGroup(){
+    try {
+      const response= await api.get(`/exercises/bygroup/${groupSelected}`)
+      console.log(response.data)
+      setexErcises(response.data)
+    }  catch (error) {
+      const isAppError = error instanceof AppError
+      const title =  isAppError ? error.message : "Não foi possível carregar os exercícios."
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    }
+  }
+
+  async function handleSelectGroup(group: string){
+    setGroupSelected(group)
+    await fetchExercicesByGroup()
+  }
+
   useEffect(() => {
     fetchGroups()
+    setGroupSelected(groups[0])
   }, [])
+
+  useFocusEffect( useCallback(() => {
+    fetchExercicesByGroup()
+  }, [groupSelected]))
+
 
   return(
     <VStack flex={1}>
@@ -88,13 +115,11 @@ export function Home(){
 
         <FlatList 
           data={exercises}
-          keyExtractor={item => item}
+          keyExtractor={item => item.id}
           renderItem={ ({ item }) => {
             return(
               <ExerciseCard
-                title={item}
-                imageUri='https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dW5pbGF0ZXJhbCUyMHB1bGx1cHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60'
-                description={item}
+                data={item}
                 onPress={handleOpenExerciseDetails} 
               />
             )

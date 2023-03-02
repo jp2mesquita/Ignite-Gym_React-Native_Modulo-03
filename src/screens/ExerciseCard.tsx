@@ -1,14 +1,16 @@
-import { Heading, HStack, Text, VStack, Icon, useTheme, Image } from "native-base";
+import { useEffect } from "react";
 import { TouchableOpacity, TouchableOpacityProps } from "react-native";
+import { Heading, HStack, Text, VStack, Icon, useTheme, Image } from "native-base";
 import { Entypo } from '@expo/vector-icons'
 
+import { ExerciseDTO } from "@dtos/ExerciseDTO";
+import { api } from "@services/api";
+
 type ExerciseCardProps = TouchableOpacityProps & {
-  title: string
-  description: string
-  imageUri: string
+  data: ExerciseDTO
 }
 
-export function ExerciseCard({description, imageUri, title, ...rest}: ExerciseCardProps){
+export function ExerciseCard({data, ...rest}: ExerciseCardProps){
   const { colors } = useTheme()
 
   return(
@@ -17,7 +19,7 @@ export function ExerciseCard({description, imageUri, title, ...rest}: ExerciseCa
     >
       <HStack bg='gray.500' p={2} alignItems='center' pr={4} rounded='md' mb={3}>
         <Image  
-          source={{ uri: imageUri}}
+          source={{ uri: `${api.defaults.baseURL}/exercise/thumb/${data.thumb}`}}
           alt='Exercício de barra fixa'
           w={16}
           h={16}
@@ -28,11 +30,11 @@ export function ExerciseCard({description, imageUri, title, ...rest}: ExerciseCa
 
         <VStack flex={1}>
           <Heading color='white' fontFamily='heading' fontSize='lg'>
-            {title}
+            {data.name}
           </Heading>
 
           <Text color='gray.200' fontFamily='body' fontSize='sm' mt={1} numberOfLines={2}>
-            3 séries x 12 repetições
+            {`${data.series} séries x ${data.repetitions} repetições`}
         </Text>
         </VStack>
 
