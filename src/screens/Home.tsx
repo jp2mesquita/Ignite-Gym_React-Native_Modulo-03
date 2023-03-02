@@ -5,6 +5,7 @@ import { HStack, VStack, FlatList, Heading, Text, useToast } from "native-base";
 import { ExerciseCard } from "./ExerciseCard";
 
 import { Group } from "@components/Group";
+import { Loading } from "@components/Loading";
 import { HomeHeader } from "@components/HomeHeader";
 
 import { api } from "@services/api";
@@ -14,10 +15,11 @@ import { AppNavigationRoutesProps } from "@routes/app.routes";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 
 export function Home(){
+  const [isLoading, setIsLoading] = useState(true)
   const [groups, setGroups]= useState<string[]>([])
-  const [exercises, setexErcises]= useState<ExerciseDTO[]>([])
+  const [exercises, setExercises]= useState<ExerciseDTO[]>([])
+  const [ groupSelected, setGroupSelected ] = useState('costas')
 
-  const [ groupSelected, setGroupSelected ] = useState('')
 
   const { navigate } = useNavigation<AppNavigationRoutesProps>()
 
@@ -30,6 +32,7 @@ export function Home(){
 
   async function fetchGroups(){
     try {
+     
 
       const response = await api.get('/groups')
       setGroups(response.data)
@@ -43,14 +46,15 @@ export function Home(){
         placement: 'top',
         bgColor: 'red.500'
       })
-    }
+    } 
   }
 
   async function fetchExercicesByGroup(){
     try {
+      setIsLoading(true)
+
       const response= await api.get(`/exercises/bygroup/${groupSelected}`)
-      console.log(response.data)
-      setexErcises(response.data)
+      setExercises(response.data)
     }  catch (error) {
       const isAppError = error instanceof AppError
       const title =  isAppError ? error.message : "Não foi possível carregar os exercícios."
@@ -60,17 +64,18 @@ export function Home(){
         placement: 'top',
         bgColor: 'red.500'
       })
+    }finally{
+      setIsLoading(false)
     }
   }
 
   async function handleSelectGroup(group: string){
     setGroupSelected(group)
-    await fetchExercicesByGroup()
   }
 
   useEffect(() => {
     fetchGroups()
-    setGroupSelected(groups[0])
+    
   }, [])
 
   useFocusEffect( useCallback(() => {
@@ -113,22 +118,27 @@ export function Home(){
           </Text>
         </HStack>
 
-        <FlatList 
-          data={exercises}
-          keyExtractor={item => item.id}
-          renderItem={ ({ item }) => {
-            return(
-              <ExerciseCard
-                data={item}
-                onPress={handleOpenExerciseDetails} 
-              />
-            )
-          }}
-          showsVerticalScrollIndicator={false}
-          _contentContainerStyle={{
-            paddingBottom: 16
-          }}
-        />
+        {isLoading 
+          ? <Loading />
+          : <FlatList 
+              data={exercises}
+              keyExtractor={item => item.id}
+              renderItem={ ({ item }) => {
+                return(
+                  
+                  <ExerciseCard
+                    data={item}
+                    onPress={handleOpenExerciseDetails} 
+                  />
+                )
+              }}
+              showsVerticalScrollIndicator={false}
+              _contentContainerStyle={{
+                paddingBottom: 16
+              }}
+            />
+        }
+        
         
       </VStack>
     </VStack>
