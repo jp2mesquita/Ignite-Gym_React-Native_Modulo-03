@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { HStack, VStack, FlatList, Heading, Text, useToast } from "native-base";
 
-import { ExerciseCard } from "./ExerciseCard";
+import { ExerciseCard } from "../components/ExerciseCard";
 
 import { Group } from "@components/Group";
 import { Loading } from "@components/Loading";
