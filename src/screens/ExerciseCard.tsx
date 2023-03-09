@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { TouchableOpacity, TouchableOpacityProps } from "react-native";
 import { Heading, HStack, Text, VStack, Icon, useTheme, Image } from "native-base";
 import { Entypo } from '@expo/vector-icons'
