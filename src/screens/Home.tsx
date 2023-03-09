@@ -18,7 +18,7 @@ export function Home(){
   const [isLoading, setIsLoading] = useState(true)
   const [groups, setGroups]= useState<string[]>([])
   const [exercises, setExercises]= useState<ExerciseDTO[]>([])
-  const [ groupSelected, setGroupSelected ] = useState('costas')
+  const [ groupSelected, setGroupSelected ] = useState('')
 
 
   const { navigate } = useNavigation<AppNavigationRoutesProps>()
@@ -26,8 +26,10 @@ export function Home(){
   const toast = useToast()
 
 
-  function handleOpenExerciseDetails() {
-    navigate('exercise')
+  function handleOpenExerciseDetails(exerciseId: string) {
+    navigate('exercise', {
+      exerciseId
+    })
   }
 
   async function fetchGroups(){
@@ -36,6 +38,7 @@ export function Home(){
 
       const response = await api.get('/groups')
       setGroups(response.data)
+      setGroupSelected(response.data[0])
 
     } catch (error) {
       const isAppError = error instanceof AppError
@@ -128,7 +131,7 @@ export function Home(){
                   
                   <ExerciseCard
                     data={item}
-                    onPress={handleOpenExerciseDetails} 
+                    onPress={() => handleOpenExerciseDetails(item.id)} 
                   />
                 )
               }}
