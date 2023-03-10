@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { Center, ScrollView, VStack, Skeleton, Text, Heading, useToast } from "native-base";
+import { Center, ScrollView, VStack, Skeleton, Text, Heading, useToast, ArrowUpIcon } from "native-base";
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useAuth } from "@hooks/useAuth";
 
 import * as ImagePicker from 'expo-image-picker'
 import * as FileSystem from 'expo-file-system';
@@ -12,7 +13,10 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { UserPhoto } from "@components/UserPhoto";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { useAuth } from "@hooks/useAuth";
+
+import { AppError } from "@utils/AppError";
+
+import { api } from "@services/api";
 
 const PHOTO_SIZE= 33
 
@@ -46,10 +50,11 @@ const profileSchema = yup.object({
 })
 
 export function Profile(){
+  const [isUpdating, setIsUpdating] = useState(false)
   const [photoIsLoading, setPhotoIsLoading] = useState(false)
   const [userPhoto, setUserPhoto] = useState('https://github.com/jp2mesquita.png')
 
-  const toast = useToast()
+  
   const { user } = useAuth()
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     defaultValues: {
@@ -59,6 +64,8 @@ export function Profile(){
     resolver: yupResolver(profileSchema)
   })
   
+  const toast = useToast()
+
   async function handleUserPhotoSelect(){
     setPhotoIsLoading(true)
     try {
@@ -99,7 +106,28 @@ export function Profile(){
   }
 
   async function handleProfileUpdate(data: FormDataProps){
-    console.log(data)
+    try {
+      setIsUpdating(true)
+      await api.put('/users', data)
+
+      toast.show({
+        title: 'Perfil atualizado com sucesso.',
+        placement: 'top',
+        bgColor: 'green.700'
+      })
+    } catch (error) {
+      const isAppError = error instanceof AppError
+      const title = isAppError ? error.message : "Não foi possível atualizar o perfil."
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+
+    }finally{
+      setIsUpdating(false)
+    }
   }
 
   return(
@@ -213,6 +241,7 @@ export function Profile(){
           <Button 
             title="Atualizar"
             mt={4}
+            isLoading={isUpdating}
             onPress={handleSubmit(handleProfileUpdate)}
           />
         </Center>
