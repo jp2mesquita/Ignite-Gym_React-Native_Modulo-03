@@ -95,9 +95,30 @@ export function Profile(){
           return
         }
 
-        setUserPhoto(selectedPhoto.assets[0].uri)
+        const fileExtention = selectedPhoto.assets[0].uri.split('.').pop()
+        
+        const photoFile = {
+          name: `${user.name}.${fileExtention}`.toLowerCase(),
+          uri: selectedPhoto.assets[0].uri,
+          type: `${selectedPhoto.assets[0].type}/${fileExtention}`
+        } as any
+        
+
+        const userPhotoUploadForm = new FormData()
+        userPhotoUploadForm.append('avatar', photoFile)
+
+        await api.patch('/users/avatar', userPhotoUploadForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+        toast.show({
+          title: 'Foto atualizada.',
+          placement: 'top',
+          bgColor: 'green.500'
+        })
       }
-  
       
     } catch (error) {
       console.log(error)
