@@ -82,18 +82,18 @@ export function Profile(){
         return
       }
 
+      
+
       if(selectedPhoto.assets[0].uri) {
         const photoInfo = await FileSystem.getInfoAsync(selectedPhoto.assets[0].uri)
 
         if(photoInfo.size && (photoInfo.size > 1024 * 1024 * 5 )) { //bigger than 5MB
           
-          toast.show({
+          return toast.show({
             title: 'Essa imagem é muito grande. Escolha uma de até 5MB',
             placement: 'top',
             bgColor: 'red.500'
           })
-         
-          return
         }
 
         const fileExtention = selectedPhoto.assets[0].uri.split('.').pop()
@@ -116,7 +116,7 @@ export function Profile(){
 
         const userUpdated = user
         userUpdated.avatar = avatarUpdatedResponse.data.avatar
-        updateUserProfile(userUpdated)
+        await updateUserProfile(userUpdated)
 
         toast.show({
           title: 'Foto atualizada.',
