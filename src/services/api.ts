@@ -18,8 +18,8 @@ const api = axios.create({
   baseURL: 'http://192.168.1.8:3333'
 }) as APIInstanceProps
 
-let failedQueue: Array<PromiseType> = []
-let isRefresing = false
+let failedQueued: Array<PromiseType> = []
+let isRefreshing = false
 
 api.registerInterceptTokenManager = signOut => {
   const interceptTokenManager = api.interceptors.response.use( response => response, async (requestError) => {
@@ -35,9 +35,9 @@ api.registerInterceptTokenManager = signOut => {
 
         const originalRequestConfig = requestError.config
         
-        if(isRefresing){
+        if(isRefreshing){
           return new Promise((resolve, reject) => {
-            failedQueue.push({
+            failedQueued.push({
               onSuccess: (token: string) => {
                 originalRequestConfig.headers = {'Authorization': `Bearer ${token}`}
                 resolve(api(originalRequestConfig))
@@ -49,7 +49,7 @@ api.registerInterceptTokenManager = signOut => {
           })
         }
 
-        isRefresing = true
+        isRefreshing = true
 
         return new Promise( async (resolve, reject) => {
           try {
@@ -63,7 +63,7 @@ api.registerInterceptTokenManager = signOut => {
             originalRequestConfig.headers = {'Authorization': `Bearer ${data.token}`}
             api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
 
-            failedQueue.forEach(request => {
+            failedQueued.forEach(request => {
               request.onSuccess(data.token)
             })
 
@@ -72,15 +72,16 @@ api.registerInterceptTokenManager = signOut => {
             resolve(api(originalRequestConfig))
 
           } catch (error: any) {
-            failedQueue.forEach( request => {
+            console.log(error)
+            failedQueued.forEach( request => {
               request.onFailure(error)
             })
 
             signOut()
             reject(error)
           }finally {
-            isRefresing = false
-            failedQueue = []
+            isRefreshing = false
+            failedQueued = []
           }
         })
       }
