@@ -18,6 +18,8 @@ import { AppError } from "@utils/AppError";
 
 import { api } from "@services/api";
 
+import defaultUserPhotoImg from '@assets/userPhotoDefault.png'
+
 const PHOTO_SIZE= 33
 
 type FormDataProps ={
@@ -52,7 +54,6 @@ const profileSchema = yup.object({
 export function Profile(){
   const [isUpdating, setIsUpdating] = useState(false)
   const [photoIsLoading, setPhotoIsLoading] = useState(false)
-  const [userPhoto, setUserPhoto] = useState('https://github.com/jp2mesquita.png')
 
   
   const { user, updateUserProfile } = useAuth()
@@ -184,7 +185,7 @@ export function Profile(){
             : <UserPhoto 
                 size={PHOTO_SIZE} 
                 alt='Foto de perfil do usuário' 
-                source={{ uri: userPhoto}}
+                source={user.avatar ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}`} : defaultUserPhotoImg}
               />
           }
 
